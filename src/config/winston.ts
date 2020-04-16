@@ -1,18 +1,46 @@
 import appRoot from 'app-root-path';
-import { createLogger, Logger, transports } from 'winston';
+import { createLogger, Logger, transports, format } from 'winston';
+import { FileTransportOptions } from 'winston/lib/winston/transports';
 
-const loggerOptions = {
+interface LoggerOptions {
+  console: FileTransportOptions;
+  file: FileTransportOptions;
+}
+
+const loggerOptions: LoggerOptions = {
   console: {
-    colorize: true,
+    format: format.combine(
+      format.colorize({ all: true }),
+      format.timestamp({
+        format: 'YY-MM-DD HH:MM:SS',
+      }),
+      format.align(),
+      format.printf((info) => {
+        const { timestamp, level, message, ...args } = info;
+        return `${timestamp} ${level} ${message} ${
+          Object.keys(args).length ? JSON.stringify(args, null, 2) : ''
+        }`;
+      })
+    ),
     handleExceptions: true,
-    json: false,
     level: process.env.NODE_ENV === 'production' ? 'error' : 'debug',
   },
   file: {
-    colorize: false,
+    format: format.combine(
+      format.timestamp({
+        format: 'YY-MM-DD HH:MM:SS',
+      }),
+      format.align(),
+      format.json(),
+      format.printf((info) => {
+        const { timestamp, level, message, ...args } = info;
+        return `${timestamp} ${level} ${message} ${
+          Object.keys(args).length ? JSON.stringify(args, null, 2) : ''
+        }`;
+      })
+    ),
     filename: `${appRoot}/logs/app.log`,
     handleExceptions: true,
-    json: true,
     level: 'info',
     maxFiles: 5,
     maxsize: 5242880,
