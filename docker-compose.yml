@@ -1,0 +1,36 @@
+version: '3'
+services:
+  database:
+    image: 'mongo'
+    container_name: 'ddd-mongodb'
+    environment:
+      - MONGO_INITDB_DATABASE=developerdeepdives
+      - MONGO_INITDB_ROOT_USERNAME=unicornProgramming
+      - MONGO_INITDB_ROOT_PASSWORD=spicyCornSalsa
+    ports:
+      - '27017-27019:27017-27019'
+    volumes:
+      - ./init-mongo.js:/docker-entrypoint-initdb.d/init-mongo.js:ro
+      - mongo-volume:/data/db
+  api:
+    build:
+      context: .
+      dockerfile: Dockerfile.dev
+    ports:
+      - 8000:8000
+    restart: always
+    links:
+      - database
+    environment:
+      - CHOKIDAR_USEPOLLING=true
+      - SERVER_PORT=8000
+      - NODE_ENV=development
+      - SECRET_STRING=kudrghfos8erugw948u5gjhwiu4hgwo87h45pw8tu54pwiuhrs
+      - MONGO_CONNECTION_URL=mongodb://database:27017/developerdeepdives
+      - MONGO_USER=apiUser
+      - MONGO_PASSWORD=superStrongPassw0rd!
+    volumes:
+      - /usr/src/app/node_modules
+      - .:/usr/src/app
+volumes:
+  mongo-volume:

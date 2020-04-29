@@ -55,10 +55,6 @@ export const logger: Logger = createLogger({
   ],
 });
 
-// if (process.env.NODE_ENV !== 'production') {
-//   logger.debug('Logging initialized at debug level');
-// }
-
 export class LoggerStream {
   public write(message: string) {
     logger.info(message.substring(0, message.lastIndexOf('\n')));

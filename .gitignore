@@ -1,15 +1,6 @@
 /.env
-
 /node_modules
-
 /dist
-
-/logs
-
-/notes.txt
-
 /coverage
-
-/uploads
-
 /npm-debug
+/logs
