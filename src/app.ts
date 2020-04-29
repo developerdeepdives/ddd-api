@@ -1,7 +1,10 @@
+import dotenv from 'dotenv';
 import express from 'express';
-import morgan from 'morgan';
 import helmet from 'helmet';
+import morgan from 'morgan';
 import { LoggerStream } from './config/winston';
+
+dotenv.config();
 
 const app = express();
 
