@@ -4,6 +4,8 @@ import express from 'express';
 import helmet from 'helmet';
 import morgan from 'morgan';
 import { LoggerStream } from './config/winston';
+import articleRouter from './routes/article';
+import userRouter from './routes/user';
 
 dotenv.config();
 
@@ -27,5 +29,8 @@ app.get('/', (req, res) => {
     success: true,
   });
 });
+
+app.use('/article', articleRouter);
+app.use('/user', userRouter);
 
 export default app;
