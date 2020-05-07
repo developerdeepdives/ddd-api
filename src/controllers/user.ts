@@ -1,6 +1,8 @@
-import { Request, Response } from 'express';
+import { Request, Response, NextFunction } from 'express';
 import { logger } from '../config/winston';
 import User from '../models/user';
+import passport from 'passport';
+import jwt from 'jsonwebtoken';
 
 export const registerUser = async (req: Request, res: Response) => {
   try {
@@ -27,4 +29,32 @@ export const singleUser = async (req: Request, res: Response) => {
     logger.error(err);
     res.status(400).send('Failed to retrieve user.');
   }
+};
+
+export const loginUser = (req: Request, res: Response, next: NextFunction) => {
+  logger.debug('MAde it to loginUser method');
+  passport.authenticate('local', (err, user, next) => {
+    logger.debug('Inside passport authenticate');
+    try {
+      if (err || !user) {
+        if (err) {
+          logger.error(err);
+        }
+        const error = new Error('An Error has occurred');
+        return res.status(401).send(error);
+      }
+      req.login(user, { session: false }, (error) => {
+        if (error) {
+          logger.error(error);
+          return res.status(400).send('A Problem Occurred');
+        }
+        const body = { _id: user._id, email: user.email };
+        const token = jwt.sign({ user: body }, process.env.SECRET_STRING);
+        res.json({ token });
+      });
+    } catch (err) {
+      logger.error(err);
+      res.status(400).send(new Error('A Problem Occurred'));
+    }
+  })(req, res, next);
 };
