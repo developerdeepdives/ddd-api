@@ -1,4 +1,5 @@
 import mongoose, { Schema, Document } from 'mongoose';
+import bcrypt from 'bcrypt';
 
 export interface UserInterface extends Document {
   name: string;
@@ -42,6 +43,20 @@ const UserSchema: Schema = new Schema(
     },
   }
 );
+
+UserSchema.methods.validatePassword = async function (password: string) {
+  const isValid = await bcrypt.compare(password, this.password);
+  return isValid;
+};
+
+UserSchema.pre<UserInterface>('save', async function (next) {
+  if (!this.isModified('password')) {
+    return next();
+  }
+  const salt = await bcrypt.genSalt(10);
+  this.password = await bcrypt.hash(this.password, salt);
+  next();
+});
 
 const User = mongoose.model<UserInterface>('User', UserSchema);
 
