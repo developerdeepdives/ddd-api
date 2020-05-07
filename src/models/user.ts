@@ -9,6 +9,7 @@ export interface UserInterface extends Document {
   articles: string[];
   createdDate: Date;
   updatedDate: Date;
+  comparePassword: (password: string) => Promise<boolean>;
 }
 
 const UserSchema: Schema = new Schema(
@@ -44,7 +45,7 @@ const UserSchema: Schema = new Schema(
   }
 );
 
-UserSchema.methods.validatePassword = async function (password: string) {
+UserSchema.methods.comparePassword = async function (password: string) {
   const isValid = await bcrypt.compare(password, this.password);
   return isValid;
 };
