@@ -31,10 +31,8 @@ export const singleUser = async (req: Request, res: Response) => {
   }
 };
 
-export const loginUser = (req: Request, res: Response, next: NextFunction) => {
-  logger.debug('MAde it to loginUser method');
-  passport.authenticate('local', (err, user, next) => {
-    logger.debug('Inside passport authenticate');
+export const loginUser = (req: Request, res: Response) => {
+  passport.authenticate('local', (err, user) => {
     try {
       if (err || !user) {
         if (err) {
@@ -56,5 +54,5 @@ export const loginUser = (req: Request, res: Response, next: NextFunction) => {
       logger.error(err);
       res.status(400).send(new Error('A Problem Occurred'));
     }
-  })(req, res, next);
+  })(req, res);
 };

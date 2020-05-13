@@ -7,7 +7,7 @@ import passport from 'passport';
 import { LoggerStream } from './config/winston';
 import articleRouter from './routes/article';
 import userRouter from './routes/user';
-import LocalStrategy from './auth/auth';
+import localStrategy from './auth/auth';
 
 dotenv.config();
 
@@ -28,7 +28,7 @@ app.use(express.urlencoded({ extended: false }));
 
 app.use(passport.initialize());
 
-passport.use(LocalStrategy);
+passport.use('local', localStrategy);
 
 app.get('/', (req, res) => {
   return res.send({
