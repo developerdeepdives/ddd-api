@@ -32,11 +32,14 @@ export const singleUser = async (req: Request, res: Response) => {
 };
 
 export const loginUser = (req: Request, res: Response) => {
-  passport.authenticate('local', (err, user) => {
+  passport.authenticate('local', (err, user, info) => {
     try {
       if (err || !user) {
         if (err) {
           logger.error(err);
+        }
+        if (!user && info) {
+          logger.debug(info.message);
         }
         const error = new Error('An Error has occurred');
         return res.status(401).send(error);
@@ -46,8 +49,10 @@ export const loginUser = (req: Request, res: Response) => {
           logger.error(error);
           return res.status(400).send('A Problem Occurred');
         }
-        const body = { _id: user._id, email: user.email };
-        const token = jwt.sign({ user: body }, process.env.SECRET_STRING);
+        const body = { _id: user._id, email: user.email, name: user.name };
+        const token = jwt.sign({ user: body }, process.env.SECRET_STRING, {
+          expiresIn: 300,
+        });
         res.json({ token });
       });
     } catch (err) {
