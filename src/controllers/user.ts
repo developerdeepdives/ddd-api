@@ -20,6 +20,55 @@ export const registerUser = async (req: Request, res: Response) => {
   }
 };
 
+export const changePassword = async (req: Request, res: Response) => {
+  try {
+    const { newPassword, newPasswordConfirm, oldPassword } = req.body;
+    const userId = req.user._id;
+    if (newPassword !== newPasswordConfirm) {
+      throw new Error('Passwords must match.');
+    }
+    const user = await User.findById(userId);
+    if (!user) {
+      throw new Error('User does not exist');
+    }
+    const isValidOldPassword = await user.comparePassword(oldPassword);
+    if (isValidOldPassword) {
+      user.password = newPassword;
+      await user.save();
+    }
+    throw new Error('Invalid old password.');
+  } catch (err) {
+    logger.error(err);
+    res.status(400).send('Failed to change password.');
+  }
+};
+
+export const editUser = async (req: Request, res: Response) => {
+  try {
+    const { name, bio } = req.body;
+    const userId = req.params.id;
+    const updatedUser = await User.findByIdAndUpdate(
+      userId,
+      {
+        name,
+        bio,
+      },
+      {
+        new: true,
+      }
+    );
+    res.send({
+      name: updatedUser.name,
+      email: updatedUser.email,
+      _id: updatedUser._id,
+      bio: updatedUser.bio,
+    });
+  } catch (err) {
+    logger.error(err);
+    res.status(400).send('Failed to edit user.');
+  }
+};
+
 export const singleUser = async (req: Request, res: Response) => {
   try {
     const { id } = req.params;

@@ -8,7 +8,7 @@ import { LoggerStream } from './config/winston';
 import articleRouter from './routes/article';
 import userRouter from './routes/user';
 import localStrategy from './auth/auth';
-import jwtStrategy from './auth/verifyToken';
+import jwtStrategy, { authenticateUser } from './auth/verifyToken';
 
 dotenv.config();
 
@@ -32,7 +32,7 @@ app.use(passport.initialize());
 passport.use('local', localStrategy);
 passport.use('jwt', jwtStrategy);
 
-app.get('/', passport.authenticate('jwt', { session: false }), (req, res) => {
+app.get('/', authenticateUser, (req, res) => {
   return res.send({
     success: true,
   });
