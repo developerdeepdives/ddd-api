@@ -1,6 +1,6 @@
 {
   "name": "ddd-api-new",
-  "version": "1.0.0",
+  "version": "1.0.1",
   "description": "",
   "main": "index.js",
   "scripts": {
@@ -27,6 +27,9 @@
     "@types/passport": "^1.0.3",
     "@types/passport-jwt": "^3.0.3",
     "@types/passport-local": "^1.0.33",
+    "@types/socket.io": "^2.1.5",
+    "@types/socketio-jwt": "0.0.1",
+    "@types/socketio-jwt-auth": "0.0.0",
     "@typescript-eslint/eslint-plugin": "^2.28.0",
     "@typescript-eslint/parser": "^2.28.0",
     "eslint": "^6.8.0",
@@ -54,6 +57,9 @@
     "passport": "^0.4.1",
     "passport-jwt": "^4.0.0",
     "passport-local": "^1.0.0",
+    "socket.io": "^2.3.0",
+    "socketio-jwt": "^4.5.0",
+    "socketio-jwt-auth": "^0.1.0",
     "winston": "^3.2.1"
   }
 }

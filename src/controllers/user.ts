@@ -1,4 +1,4 @@
-import { Request, Response, NextFunction } from 'express';
+import { Request, Response } from 'express';
 import { logger } from '../config/winston';
 import User from '../models/user';
 import passport from 'passport';

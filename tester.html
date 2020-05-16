@@ -1,0 +1,66 @@
+<script src="https://cdnjs.cloudflare.com/ajax/libs/socket.io/2.3.0/socket.io.dev.js"></script>
+<script>
+  var TOKEN =
+    'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VyIjp7Il9pZCI6IjVlYmM3YjMwZjdlYWZiMDEyYjUwNDNjMyIsImVtYWlsIjoidHlsZXJnQHRlc3QuY29tIiwibmFtZSI6IlR5bGVyIn0sImlhdCI6MTU4OTYwODY2NiwiZXhwIjoxNTg5NjA4OTY2fQ.Fn4X35E35L0YoL49INKV__Wk0dSWCJva_IzvzRmvgEE';
+
+  function init() {
+    output = document.getElementById('output');
+    testSocket();
+  }
+
+  function testSocket() {
+    var socket = io('http://localhost:8000', {
+      extraHeaders: {
+        'x-auth-token': TOKEN,
+      },
+      transportOptions: {
+        polling: {
+          extraHeaders: {
+            'x-auth-token': TOKEN,
+          },
+        },
+      },
+    });
+    socket.on('test', onMessage);
+    socket.on('connect', onConnect);
+    socket.on('disconnect', onDisconnect);
+    socket.on('connect_error', onError);
+    socket.on('reconnect_error', onError);
+
+    function onConnect(evt) {
+      writeToScreen('CONNECTED');
+      doSend('Allo?');
+    }
+
+    function onDisconnect(evt) {
+      writeToScreen('DISCONNECTED');
+    }
+
+    function onMessage(data) {
+      writeToScreen('<span style="color: blue;">RESPONSE: ' + data + '</span>');
+      socket.close();
+    }
+
+    function onError(message) {
+      writeToScreen('<span style="color: red;">ERROR:</span> ' + message);
+    }
+
+    function doSend(message) {
+      writeToScreen('SENT: ' + message);
+      socket.emit('test', message);
+    }
+
+    function writeToScreen(message) {
+      var pre = document.createElement('p');
+      pre.style.wordWrap = 'break-word';
+      pre.innerHTML = message;
+      output.appendChild(pre);
+    }
+  }
+
+  window.addEventListener('load', init, false);
+</script>
+
+<h2>Socket.io Test</h2>
+
+<div id="output"></div>
