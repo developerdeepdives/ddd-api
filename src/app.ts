@@ -16,6 +16,7 @@ import User from './models/user';
 import articleRouter from './routes/article';
 import userRouter from './routes/user';
 import challengeRouter from './routes/challenge';
+import roomRouter from './routes/room';
 
 dotenv.config();
 
@@ -45,7 +46,7 @@ passport.use('jwt', jwtStrategy);
 
 app.get('/', async (req, res) => {
   await User.findOneAndUpdate(
-    { email: 'tylerg@test.com' },
+    { email: 'tyler@test.com' },
     {
       $set: {
         emailVerified: true,
@@ -60,6 +61,7 @@ app.get('/', async (req, res) => {
 app.use('/article', articleRouter);
 app.use('/user', userRouter);
 app.use('/challenge', challengeRouter);
+app.use('/room', roomRouter);
 
 const server = http.createServer(app);
 const io = socketIo(server, {
