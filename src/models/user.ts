@@ -7,8 +7,10 @@ export interface UserInterface extends Document {
   email: string;
   password: string;
   articles: string[];
+  challenges: string[];
   createdDate: Date;
   updatedDate: Date;
+  emailVerified: boolean;
   comparePassword: (password: string) => Promise<boolean>;
 }
 
@@ -25,6 +27,7 @@ const UserSchema: Schema = new Schema(
     email: {
       type: String,
       required: true,
+      unique: true,
     },
     password: {
       type: String,
@@ -36,6 +39,21 @@ const UserSchema: Schema = new Schema(
         ref: 'Article',
       },
     ],
+    challenges: [
+      {
+        type: Schema.Types.ObjectId,
+        ref: 'Challenge',
+      },
+    ],
+    emailVerified: {
+      type: Boolean,
+      required: true,
+      default: false,
+    },
+    room: {
+      type: Schema.Types.ObjectId,
+      ref: 'Room',
+    },
   },
   {
     timestamps: {

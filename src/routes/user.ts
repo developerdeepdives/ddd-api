@@ -14,6 +14,7 @@ router.put(
   UserController.editUser
 );
 router.get('/:id', UserController.singleUser);
+router.get('/verifyEmail/:token', UserController.verifyEmail);
 router.post('/login', UserController.loginUser);
 
 export default router;

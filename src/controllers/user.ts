@@ -3,20 +3,71 @@ import { logger } from '../config/winston';
 import User from '../models/user';
 import passport from 'passport';
 import jwt from 'jsonwebtoken';
+import Token from '../models/Token';
+import crypto from 'crypto';
+import nodemailer from 'nodemailer';
 
 export const registerUser = async (req: Request, res: Response) => {
   try {
-    const { name, email, password, bio } = req.body;
+    const { name, email, password, confirmPassword, bio } = req.body;
+    if (password !== confirmPassword) {
+      throw new Error('Passwords must match.');
+    }
     const user = new User({ name, email, password, bio });
     const savedUser = await user.save();
-    res.send({
-      name: savedUser.name,
-      email: savedUser.email,
-      _id: savedUser._id,
+    const token = new Token({
+      user: savedUser._id,
+      token: crypto.randomBytes(16).toString('hex'),
     });
+    await token.save();
+    const mailTransport = nodemailer.createTransport({
+      service: 'SendGrid',
+      auth: {
+        user: process.env.SEND_GRID_USER,
+        pass: process.env.SEND_GRID_PASSWORD,
+      },
+    });
+    const mailOptions = {
+      from: 'no-reply@developerdeepdives.com',
+      to: user.email,
+      subject: 'Account Verification Token',
+      text:
+        'Hello,\n\n' +
+        'Please verify your account by clicking the link: \nhttp://' +
+        req.headers.host +
+        '/confirmation/' +
+        token.token +
+        '.\n',
+    };
+    await mailTransport.sendMail(mailOptions);
+    res
+      .status(200)
+      .send('A verification email has been sent to ' + user.email + '.');
   } catch (err) {
     logger.error(err);
     res.status(400).send('Failed to register new user.');
+  }
+};
+
+export const verifyEmail = async (req: Request, res: Response) => {
+  try {
+    const { token } = req.params;
+    const tokenData = await Token.findOne({
+      token,
+    });
+    const user = await User.findById(tokenData.user);
+    if (!user) {
+      return res.status(400).send('Unable to find a user for this token.');
+    }
+    if (user.emailVerified) {
+      return res.status(400).send('This user has already been verified.');
+    }
+    user.emailVerified = true;
+    await user.save();
+    res.send('Successfully verified email address. Please log in.');
+  } catch (err) {
+    logger.error(err);
+    res.status(400).send('Failed to verify email address');
   }
 };
 

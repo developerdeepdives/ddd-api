@@ -19,6 +19,11 @@ export default new LocalStrategy(
           message: 'Password is wrong',
         });
       }
+      if (!user.emailVerified) {
+        return done(null, false, {
+          message: 'Email has not been verified.',
+        });
+      }
       return done(null, user);
     } catch (err) {
       return done(err);

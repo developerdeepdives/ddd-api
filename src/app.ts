@@ -5,15 +5,17 @@ import helmet from 'helmet';
 import morgan from 'morgan';
 import passport from 'passport';
 import { LoggerStream, logger } from './config/winston';
-import articleRouter from './routes/article';
-import userRouter from './routes/user';
 import localStrategy from './auth/auth';
-import jwtStrategy, { authenticateUser } from './auth/verifyToken';
+import jwtStrategy from './auth/verifyToken';
 import http from 'http';
 import socketIo from 'socket.io';
 import socketioJwt from 'socketio-jwt-auth';
 import onConnection from './handlers/socket';
 import User from './models/user';
+
+import articleRouter from './routes/article';
+import userRouter from './routes/user';
+import challengeRouter from './routes/challenge';
 
 dotenv.config();
 
@@ -28,7 +30,7 @@ app.use(
 
 app.use(
   cors({
-    allowedHeaders: 'x-auth-token',
+    allowedHeaders: ['x-auth-token', 'Authorization', 'Content-Type'],
   })
 );
 
@@ -41,7 +43,15 @@ app.use(passport.initialize());
 passport.use('local', localStrategy);
 passport.use('jwt', jwtStrategy);
 
-app.get('/', authenticateUser, (req, res) => {
+app.get('/', async (req, res) => {
+  await User.findOneAndUpdate(
+    { email: 'tylerg@test.com' },
+    {
+      $set: {
+        emailVerified: true,
+      },
+    }
+  );
   return res.send({
     success: true,
   });
@@ -49,6 +59,7 @@ app.get('/', authenticateUser, (req, res) => {
 
 app.use('/article', articleRouter);
 app.use('/user', userRouter);
+app.use('/challenge', challengeRouter);
 
 const server = http.createServer(app);
 const io = socketIo(server, {
