@@ -4,19 +4,15 @@ import express from 'express';
 import helmet from 'helmet';
 import morgan from 'morgan';
 import passport from 'passport';
-import { LoggerStream, logger } from './config/winston';
+import { LoggerStream } from './config/winston';
 import localStrategy from './auth/auth';
 import jwtStrategy from './auth/verifyToken';
-import http from 'http';
-import socketIo from 'socket.io';
-import socketioJwt from 'socketio-jwt-auth';
-import onConnection from './handlers/socket';
 import User from './models/user';
-
 import articleRouter from './routes/article';
 import userRouter from './routes/user';
 import challengeRouter from './routes/challenge';
 import roomRouter from './routes/room';
+import languageRouter from './routes/language';
 
 dotenv.config();
 
@@ -45,14 +41,16 @@ passport.use('local', localStrategy);
 passport.use('jwt', jwtStrategy);
 
 app.get('/', async (req, res) => {
-  await User.findOneAndUpdate(
-    { email: 'tyler@test.com' },
-    {
-      $set: {
-        emailVerified: true,
-      },
-    }
-  );
+  if (process.env.NODE_ENV !== 'production') {
+    await User.findOneAndUpdate(
+      { email: 'tylers@test.com' },
+      {
+        $set: {
+          emailVerified: true,
+        },
+      }
+    );
+  }
   return res.send({
     success: true,
   });
@@ -62,42 +60,6 @@ app.use('/article', articleRouter);
 app.use('/user', userRouter);
 app.use('/challenge', challengeRouter);
 app.use('/room', roomRouter);
+app.use('/language', languageRouter);
 
-const server = http.createServer(app);
-const io = socketIo(server, {
-  handlePreflightRequest: (req, res) => {
-    const headers = {
-      'Access-Control-Allow-Headers': 'Content-Type, x-auth-token',
-      'Access-Control-Allow-Origin': req.headers.origin, //or the specific origin you want to give access to,
-      'Access-Control-Allow-Credentials': true,
-    };
-    res.writeHead(200, headers);
-    res.end();
-  },
-});
-
-io.origins('*:*');
-
-io.use(
-  socketioJwt.authenticate(
-    {
-      secret: process.env.SECRET_STRING,
-    },
-    async (payload, done) => {
-      try {
-        const user = await User.findById(payload.user._id);
-        logger.debug(payload);
-        if (!user) {
-          return done(null, false, 'user does not exist');
-        }
-        return done(null, user);
-      } catch (err) {
-        return done(err);
-      }
-    }
-  )
-);
-
-io.on('connection', onConnection);
-
-export default server;
+export default app;

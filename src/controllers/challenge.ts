@@ -71,6 +71,6 @@ export const updateChallenge = async (req: Request, res: Response) => {
     res.send(challenge);
   } catch (err) {
     logger.error(err);
-    res.status(400).send('Failed to created challenge.');
+    res.status(400).send('Failed to edit challenge.');
   }
 };

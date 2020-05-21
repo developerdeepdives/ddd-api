@@ -29,6 +29,7 @@
 
     function onConnect(evt) {
       writeToScreen('CONNECTED');
+      socket.emit('join', 'room1');
       doSend('Allo?');
     }
 

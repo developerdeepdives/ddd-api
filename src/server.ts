@@ -1,4 +1,4 @@
-import app from './app';
+import server from './socket';
 import connect from './connect';
 import { logger } from './config/winston';
 import dotenv from 'dotenv';
@@ -12,7 +12,7 @@ const mongoPassword = process.env.MONGO_PASSWORD;
 
 connect(connectionUrl, mongoUser, mongoPassword)
   .then(() => {
-    app.listen(port, () => {
+    server.listen(port, () => {
       logger.info(`Listening at http://localhost:${port}/`);
     });
   })
